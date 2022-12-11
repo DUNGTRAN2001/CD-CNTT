@@ -9,6 +9,8 @@ import { path } from "../utils";
 import Home from "../routes/Home";
 import Login from "./Auth/Login";
 import HomePage from "./HomePage/HomePage";
+import Register from "./Auth/Register";
+import { ToastContainer } from "react-toastify";
 class App extends Component {
   handlePersistorState = () => {
     const { persistor } = this.props;
@@ -37,9 +39,22 @@ class App extends Component {
               <Switch>
                 <Route path={path.HOME} exact component={Home} />
                 <Route path={path.LOGIN} exact component={Login} />
+                <Route path={path.REGISTER} exact component={Register} />
                 <Route path={path.HOMEPAGE} exact component={HomePage} />
               </Switch>
             </span>
+            <ToastContainer
+              position="top-right"
+              autoClose={3000}
+              hideProgressBar={false}
+              newestOnTop={false}
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme="colored"
+            />
           </div>
         </Router>
       </Fragment>

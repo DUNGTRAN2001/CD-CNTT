@@ -4,19 +4,48 @@ import { push } from "connected-react-router";
 // import * as actions from "../store/actions";
 // dùng cho redux
 import * as actions from "../../store/actions";
-import "./Login.scss";
 import { withRouter } from "react-router";
-import { handleLoginApi } from "../../services/userService";
+import { toast } from "react-toastify";
 
-class Login extends Component {
+class Register extends Component {
   constructor(props) {
     super(props);
     this.state = {
       userName: "",
       passWord: "",
+      email: "",
+      gender: "1",
       errMessage: "",
+      confirmPassword: "",
     };
   }
+  checkSimilarPassword = () => {
+    let isValidPassWord = true;
+    if (this.state.passWord === this.state.confirmPassword) {
+      return isValidPassWord;
+    } else {
+      toast.error("Password and confirm password are incorrect");
+      return (isValidPassWord = false);
+    }
+  };
+  //   checkValidateInput = () => {
+  //     let isValid = true;
+  //     let arrCheck = [
+  //       "userName",
+  //       "passWord",
+  //       "email",
+  //       "gender",
+  //       "confirmPassword",
+  //     ];
+  //     for (let i = 0; i < arrCheck.length; i++) {
+  //       if (!this.state.arrCheck[i]) {
+  //         isValid = false;
+  //         toast.warn("This input is required: " + arrCheck[i]);
+  //         break;
+  //       }
+  //     }
+  //   };
+
   handleOnchangeInput = (event, id) => {
     let copyState = { ...this.state };
     copyState[id] = event.target.value;
@@ -24,49 +53,37 @@ class Login extends Component {
       ...copyState,
     });
   };
-  handleLogin = async () => {
-    //trước mỗi lần login thì clear mã lỗi đi
-    this.setState({
-      errMessage: "",
-    });
-    try {
-      // gọi được thành công nhưng bị lỗi khác
-      let data = await handleLoginApi(this.state.userName, this.state.passWord);
-      //   console.log("check data", data.result.results);
-      if (
-        data &&
-        data.result &&
-        data.result.results &&
-        data.result.results.Success !== true
-      ) {
-        this.setState({
-          errMessage: "lỗi",
-        });
+  check;
+  handleRegister = async () => {
+    let checkPassword = this.checkSimilarPassword();
+
+    if (checkPassword) {
+      this.props.registerRedux({
+        username: this.state.userName,
+        email: this.state.email,
+        password: this.state.passWord,
+        gender: +this.state.gender,
+      });
+      if (this.props.history) {
+        this.props.history.push("/login");
       }
-      if (
-        data &&
-        data.result &&
-        data.result.results &&
-        data.result.results.Success === true
-      ) {
-        this.props.userLoginSucces(data.result.results.Token);
-        console.log("login success");
-        if (this.props.history) {
-          this.props.history.push("/home");
-        }
-      }
-      //
-    } catch (e) {
-      console.log(e);
+    } else {
+      this.setState({
+        userName: "",
+        passWord: "",
+        email: "",
+        gender: "1",
+        confirmPassword: "",
+      });
     }
   };
-  handleRegister = () => {
+  handleRedirectLogin = () => {
     if (this.props.history) {
-      this.props.history.push("/register");
+      this.props.history.push("/login");
     }
   };
   render() {
-    let { userName, passWord } = this.state;
+    let { userName, passWord, email, gender, confirmPassword } = this.state;
     return (
       <>
         <section className="vh-100">
@@ -124,6 +141,21 @@ class Login extends Component {
                       }
                     />
                   </div>
+                  <div className="form-outline mb-4 ">
+                    <label className="form-label" for="form3Example3">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      id="form3Example3"
+                      className="form-control form-control-lg"
+                      placeholder="Enter a valid Email"
+                      value={email}
+                      onChange={(event) =>
+                        this.handleOnchangeInput(event, "email")
+                      }
+                    />
+                  </div>
 
                   <div className="form-outline mb-3">
                     <label className="form-label" for="form3Example4">
@@ -140,36 +172,52 @@ class Login extends Component {
                       }
                     />
                   </div>
-
-                  <div className="d-flex justify-content-between align-items-center">
-                    <div className="form-check mb-0">
-                      <input
-                        className="form-check-input me-2"
-                        type="checkbox"
-                        value=""
-                        id="form2Example3"
-                      />
-                      <label className="form-check-label" for="form2Example3">
-                        Remember me
-                      </label>
-                    </div>
-                    <span className="text-body">Forgot password?</span>
+                  <div className="form-outline mb-3">
+                    <label className="form-label" for="form3Example4">
+                      Confirm Password
+                    </label>
+                    <input
+                      type="password"
+                      id="form3Example4"
+                      className="form-control form-control-lg"
+                      value={confirmPassword}
+                      placeholder="Enter password"
+                      onChange={(event) =>
+                        this.handleOnchangeInput(event, "confirmPassword")
+                      }
+                    />
                   </div>
-
+                  <div className="form-outline mb-3">
+                    <label className="form-label" for="form3Example4">
+                      Gender
+                    </label>
+                    <select
+                      id="form3Example4"
+                      name="gender"
+                      className="form-control form-control-lg"
+                      value={gender}
+                      onChange={(event) =>
+                        this.handleOnchangeInput(event, "gender")
+                      }
+                    >
+                      <option value="1">Male</option>
+                      <option value="0">FeMale</option>
+                    </select>
+                  </div>
                   <div className="text-center text-lg-start mt-4 pt-2 ">
                     <div
                       className="btn btn-primary btn-lg px-5"
-                      onClick={() => this.handleLogin()}
+                      onClick={() => this.handleRegister()}
                     >
-                      Login
+                      Register
                     </div>
                     <div className="small fw-bold mt-2 pt-1 mb-0">
-                      Don't have an account?
+                      Do you already have an account?
                       <span
                         className="link-danger"
-                        onClick={() => this.handleRegister()}
+                        onClick={() => this.handleRedirectLogin()}
                       >
-                        Register
+                        Login
                       </span>
                     </div>
                   </div>
@@ -189,8 +237,10 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    userLoginSucces: (userInfo) => dispatch(actions.userLoginSucces(userInfo)),
+    registerRedux: (data) => dispatch(actions.registerService(data)),
   };
 };
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Login));
+export default withRouter(
+  connect(mapStateToProps, mapDispatchToProps)(Register)
+);
